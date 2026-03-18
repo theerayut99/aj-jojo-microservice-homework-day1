@@ -1,5 +1,12 @@
-**
-!app/
-!bin/
-!config/
-!composer.*
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+runtime/
+test/
+vendor/
+.env
+.phpunit*
+*.cache
+*.log

@@ -12,8 +12,35 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Hyperf\Swagger\Annotation as OA;
+
+#[OA\HyperfServer('http')]
 class IndexController extends AbstractController
 {
+    #[OA\Get(path: '/', summary: 'Get loan service log entry', tags: ['Loan Service'])]
+    #[OA\Response(response: 200, description: 'Loan application log entry', content: new OA\JsonContent(
+        properties: [
+            new OA\Property(property: 'timestamp', type: 'string', example: '2026-03-18T14:10:25.123Z'),
+            new OA\Property(property: 'level', type: 'string', example: 'INFO'),
+            new OA\Property(property: 'message', type: 'string', example: 'Loan application processed successfully'),
+            new OA\Property(property: 'service', type: 'object', properties: [
+                new OA\Property(property: 'name', type: 'string', example: 'loan-service'),
+                new OA\Property(property: 'version', type: 'string', example: '1.2.0'),
+                new OA\Property(property: 'environment', type: 'string', example: 'production'),
+            ]),
+            new OA\Property(property: 'trace', type: 'object', properties: [
+                new OA\Property(property: 'trace_id', type: 'string', example: 'abc123xyz'),
+                new OA\Property(property: 'span_id', type: 'string', example: 'span-001'),
+                new OA\Property(property: 'parent_span_id', type: 'string', nullable: true),
+            ]),
+            new OA\Property(property: 'request', type: 'object'),
+            new OA\Property(property: 'response', type: 'object'),
+            new OA\Property(property: 'user', type: 'object'),
+            new OA\Property(property: 'error', type: 'string', nullable: true),
+            new OA\Property(property: 'tags', type: 'array', items: new OA\Items(type: 'string')),
+            new OA\Property(property: 'extra', type: 'object'),
+        ]
+    ))]
     public function index()
     {
         return [
