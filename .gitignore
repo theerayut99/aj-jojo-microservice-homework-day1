@@ -1,0 +1,22 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rust
+rust-hello/target/
+
+# PHP
+php-hello/vendor/
+php-hello/runtime/
+php-hello/.env
+php-hello/.phpunit*
+php-hello/*.cache
+php-hello/.phpintel/
+php-hello/phpstan.neon
+php-hello/phpunit.xml
