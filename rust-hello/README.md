@@ -1,11 +1,11 @@
 # rust-hello
 
-| Topic | Detail |
+| Component | Responsibility |
 |---|---|
-| Package Manager | cargo |
-| Dependency file | Cargo.toml |
-| Source Code | main.rs |
-| OS executable file |
+| **Package Manager** | cargo |
+| **Dependency file** | Cargo.toml |
+| **Source Code** | main.rs |
+| **OS executable file** | |
 
 ## Dependencies
 
