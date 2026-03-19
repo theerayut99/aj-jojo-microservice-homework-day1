@@ -20,6 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
 COPY --from=builder /app/target/release/rust-hello /usr/local/bin/rust-hello
 
+# Factor 3: Config via environment variables
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV RUST_LOG=info
+
 EXPOSE 3000
 
 CMD ["rust-hello"]
