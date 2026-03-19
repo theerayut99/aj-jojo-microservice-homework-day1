@@ -4,7 +4,7 @@
 |---|---|
 | **Package Manager** | npm |
 | **Dependency file** | package.json |
-| **Source Code** | src/app.controller.ts, src/app.service.ts |
+| **Source Code** | src/main.ts |
 | **Runtime** | Node.js (Express) |
 
 ## Dependencies
