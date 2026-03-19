@@ -2,13 +2,34 @@ var builder = WebApplication.CreateBuilder(args);
 
 var host = Environment.GetEnvironmentVariable("HOST") ?? "0.0.0.0";
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var logLevel = Environment.GetEnvironmentVariable("LOG_LEVEL") ?? "Information";
 
 builder.WebHost.UseUrls($"http://{host}:{port}");
+
+// --- XI. Logs: structured JSON to stdout ---
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole(options =>
+{
+    options.JsonWriterOptions = new System.Text.Json.JsonWriterOptions { Indented = false };
+    options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+});
+if (Enum.TryParse<LogLevel>(logLevel, ignoreCase: true, out var parsed))
+{
+    builder.Logging.SetMinimumLevel(parsed);
+}
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+// --- IX. Disposability: graceful shutdown ---
+app.Lifetime.ApplicationStarted.Register(() =>
+    logger.LogInformation("Application started on {Host}:{Port}", host, port));
+app.Lifetime.ApplicationStopping.Register(() =>
+    logger.LogInformation("Application shutting down"));
 
 app.UseSwagger();
 app.UseSwaggerUI();

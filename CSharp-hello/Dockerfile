@@ -14,6 +14,7 @@ COPY --from=build /app .
 
 ENV HOST=0.0.0.0
 ENV PORT=8080
+ENV LOG_LEVEL=Information
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 EXPOSE 8080
