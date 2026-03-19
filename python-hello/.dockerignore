@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+.env
+*.egg-info/
