@@ -17,6 +17,17 @@ use Hyperf\Swagger\Annotation as OA;
 #[OA\HyperfServer('http')]
 class IndexController extends AbstractController
 {
+    #[OA\Get(path: '/health', summary: 'Health check', tags: ['Health'])]
+    #[OA\Response(response: 200, description: 'Service is healthy', content: new OA\JsonContent(
+        properties: [
+            new OA\Property(property: 'status', type: 'string', example: 'ok'),
+        ]
+    ))]
+    public function health()
+    {
+        return ['status' => 'ok'];
+    }
+
     #[OA\Get(path: '/', summary: 'Get loan service log entry', tags: ['Loan Service'])]
     #[OA\Response(response: 200, description: 'Loan application log entry', content: new OA\JsonContent(
         properties: [

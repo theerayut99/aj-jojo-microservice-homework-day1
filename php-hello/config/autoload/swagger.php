@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'enable' => true,
-    'port' => 9500,
+    'port' => (int) (getenv('SWAGGER_PORT') ?: 9500),
     'json_dir' => BASE_PATH . '/storage/swagger',
     'html' => <<<'HTML'
 <!DOCTYPE html>

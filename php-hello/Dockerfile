@@ -15,7 +15,6 @@ LABEL maintainer="Hyperf Developers <group@hyperf.io>" version="1.0" license="MI
 ARG timezone
 
 ENV TIMEZONE=${timezone:-"Asia/Shanghai"} \
-    APP_ENV=prod \
     SCAN_CACHEABLE=(true)
 
 # update
@@ -49,6 +48,16 @@ WORKDIR /opt/www
 COPY . /opt/www
 RUN composer install --no-dev -o && php bin/hyperf.php
 
+# Factor 3: Config via environment variables
+ENV HOST=0.0.0.0
+ENV PORT=9501
+ENV SWAGGER_PORT=9500
+ENV LOG_LEVEL=info
+ENV APP_ENV=prod
+
 EXPOSE 9501 9500
+
+# Factor 9: Graceful shutdown — Swoole handles SIGTERM natively
+STOPSIGNAL SIGTERM
 
 ENTRYPOINT ["php", "/opt/www/bin/hyperf.php", "start"]

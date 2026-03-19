@@ -9,22 +9,24 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+$logLevel = match (strtolower(getenv('LOG_LEVEL') ?: 'info')) {
+    'debug' => Monolog\Logger::DEBUG,
+    'warning', 'warn' => Monolog\Logger::WARNING,
+    'error' => Monolog\Logger::ERROR,
+    default => Monolog\Logger::INFO,
+};
+
 return [
     'default' => [
         'handler' => [
             'class' => Monolog\Handler\StreamHandler::class,
             'constructor' => [
-                'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
-                'level' => Monolog\Logger::DEBUG,
+                'stream' => 'php://stdout',
+                'level' => $logLevel,
             ],
         ],
         'formatter' => [
-            'class' => Monolog\Formatter\LineFormatter::class,
-            'constructor' => [
-                'format' => null,
-                'dateFormat' => 'Y-m-d H:i:s',
-                'allowInlineLineBreaks' => true,
-            ],
+            'class' => Monolog\Formatter\JsonFormatter::class,
         ],
     ],
 ];
