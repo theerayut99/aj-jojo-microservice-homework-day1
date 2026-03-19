@@ -1,9 +1,23 @@
 # rust-hello
 
-Package Manager: cargo
-Dependency file: Cargo.toml
-Source Code: main.rs
-OS executable file
+| Topic | Detail |
+|---|---|
+| Package Manager | cargo |
+| Dependency file | Cargo.toml |
+| Source Code | main.rs |
+| OS executable file |
+
+## Dependencies
+
+| Crate | Purpose |
+|---|---|
+| axum | Web framework |
+| tokio | Async runtime |
+| serde / serde_json | JSON serialization |
+| tracing / tracing-subscriber | Structured JSON logging |
+| utoipa / utoipa-swagger-ui | Swagger / OpenAPI documentation |
+
+---
 
 
 Rust microservice built with [Axum](https://github.com/tokio-rs/axum) that returns a sample loan-service JSON log entry.
@@ -124,18 +138,6 @@ Health check endpoint for liveness/readiness probes.
 ```json
 { "status": "ok" }
 ```
-
-## Dependencies
-
-| Crate | Purpose |
-|---|---|
-| axum | Web framework |
-| tokio | Async runtime |
-| serde / serde_json | JSON serialization |
-| tracing / tracing-subscriber | Structured JSON logging |
-| utoipa / utoipa-swagger-ui | Swagger / OpenAPI documentation |
-
----
 
 ## 12-Factor App
 
