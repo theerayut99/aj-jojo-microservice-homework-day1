@@ -17,6 +17,33 @@
 | tracing / tracing-subscriber | Structured JSON logging |
 | utoipa / utoipa-swagger-ui | Swagger / OpenAPI documentation |
 
+## Axum — ข้อดีและข้อเสีย
+
+### ข้อดี (Pros)
+
+| ข้อดี | รายละเอียด |
+|---|---|
+| **Performance สูงมาก** | Axum รันบน Tokio async runtime ใช้ zero-cost abstractions ของ Rust ทำให้ throughput สูงและ latency ต่ำ ติดอันดับต้น ๆ ใน TechEmpower benchmarks |
+| **Memory Safety** | Rust compiler รับประกัน memory safety ไม่มี null pointer, data race, buffer overflow — ลด bug ที่พบบ่อยใน C/C++ โดยไม่ต้องใช้ garbage collector |
+| **Type-safe Routing** | Extractor pattern (`Path`, `Query`, `Json`) ทำให้ request parsing เป็น type-safe ถ้า type ไม่ตรงจะ compile error แทนที่จะ runtime error |
+| **Tower Ecosystem** | ใช้ `tower::Service` trait เป็น middleware layer ทำให้ใช้ middleware ร่วมกับ ecosystem อื่น ๆ ได้ (tonic, hyper) และเขียน middleware ที่ reusable |
+| **Minimal & Modular** | Framework ไม่บังคับ ORM, template engine หรือ pattern ใด ๆ เลือกใช้เฉพาะที่ต้องการ ไม่มี bloat |
+| **Tokio Integration** | เป็น first-class citizen ของ Tokio ecosystem ใช้ร่วมกับ tokio, hyper, tonic ได้อย่าง seamless |
+| **Compile-time Guarantees** | Handler ที่ signature ผิดจะ compile ไม่ผ่าน ลดข้อผิดพลาดที่จะไปเจอตอน runtime |
+| **Single Binary Deployment** | Compile เป็น static binary ตัวเดียว ไม่ต้องติดตั้ง runtime, interpreter หรือ dependency บน server — deploy ง่าย image size เล็ก |
+
+### ข้อเสีย (Cons)
+
+| ข้อเสีย | รายละเอียด |
+|---|---|
+| **Learning Curve สูง** | ต้องเข้าใจ ownership, borrowing, lifetimes, async/await, trait system ของ Rust ก่อน ซึ่งยากกว่า framework อื่นมาก |
+| **Compile Time นาน** | Rust compile ช้ากว่า Go, Node.js, PHP มาก โดยเฉพาะ full build ครั้งแรก (รวม dependencies) อาจใช้เวลาหลายนาที |
+| **Error Messages ซับซ้อน** | Async + generic + trait bound ทำให้ compiler error ยาวและอ่านยาก โดยเฉพาะเมื่อ handler signature ไม่ตรง |
+| **Ecosystem ยังเล็กกว่า** | เทียบกับ Express (Node.js), Spring (Java), Laravel (PHP) แล้ว library และ middleware สำเร็จรูปน้อยกว่า ต้องเขียนเองบ่อยกว่า |
+| **Boilerplate มากกว่า** | Rust บังคับ explicit error handling (`Result<T, E>`) และ type annotation ทำให้โค้ดยาวกว่า dynamic language สำหรับงานง่าย ๆ |
+| **Async Complexity** | `Pin`, `Future`, `Send + Sync` bounds อาจทำให้สับสน โดยเฉพาะเมื่อใช้ closure หรือ shared state ข้าม async boundary |
+| **Rapid Evolution** | Axum ยังพัฒนาเร็ว มี breaking changes ระหว่าง major version (เช่น 0.6 → 0.7 → 0.8) ต้อง migrate โค้ดเมื่ออัปเดต |
+
 ---
 
 
