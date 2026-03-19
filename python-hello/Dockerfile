@@ -9,7 +9,10 @@ COPY . .
 
 ENV HOST=0.0.0.0
 ENV PORT=8000
+ENV LOG_LEVEL=info
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+STOPSIGNAL SIGTERM
+
+CMD uvicorn main:app --host $HOST --port $PORT --log-level $LOG_LEVEL

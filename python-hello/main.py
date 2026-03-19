@@ -1,8 +1,46 @@
+import logging
+import os
+import signal
+import sys
+
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+from pythonjsonlogger import json as json_log
 
-app = FastAPI(title="python-hello", version="1.0.0")
+# --- I. Config: env vars ---
+HOST = os.environ.get("HOST", "0.0.0.0")
+PORT = int(os.environ.get("PORT", "8000"))
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "info").upper()
+
+# --- XI. Logs: structured JSON to stdout ---
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(json_log.JsonFormatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+logging.basicConfig(level=LOG_LEVEL, handlers=[handler])
+logger = logging.getLogger("python-hello")
 
 
+# --- IX. Disposability: graceful shutdown ---
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    logger.info("Application started", extra={"host": HOST, "port": PORT})
+    yield
+    logger.info("Application shutting down")
+
+
+app = FastAPI(title="python-hello", version="1.0.0", lifespan=lifespan)
+
+
+def _handle_signal(sig, _frame):
+    logger.info("Received signal %s, shutting down", signal.Signals(sig).name)
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, _handle_signal)
+signal.signal(signal.SIGINT, _handle_signal)
+
+
+# --- VIII. Concurrency: stateless process ---
 @app.get("/")
 def get_loan_log():
     return {
@@ -47,3 +85,9 @@ def get_loan_log():
         "tags": ["loan", "apply"],
         "extra": {},
     }
+
+
+# --- XII. Admin processes ---
+@app.get("/health")
+def health():
+    return {"status": "ok"}
