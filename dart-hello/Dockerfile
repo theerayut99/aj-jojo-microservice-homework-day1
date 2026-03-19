@@ -1,0 +1,28 @@
+# Use latest stable channel SDK.
+FROM dart:stable AS build
+
+# Resolve app dependencies.
+WORKDIR /app
+COPY pubspec.* ./
+RUN dart pub get
+
+# Copy app source code (except anything in .dockerignore) and AOT compile app.
+COPY . .
+RUN dart build cli --target bin/server.dart -o output
+
+# Build minimal serving image from AOT-compiled `/server`
+# and the pre-built AOT-runtime in the `/runtime/` directory of the base image.
+FROM scratch
+COPY --from=build /runtime/ /
+COPY --from=build /app/output/bundle/ /app/
+
+# 12-Factor: configuration via environment variables
+ENV HOST=0.0.0.0
+ENV PORT=8080
+ENV LOG_LEVEL=info
+
+# Graceful shutdown
+STOPSIGNAL SIGTERM
+
+EXPOSE 8080
+CMD ["/app/bin/server"]
