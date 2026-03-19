@@ -1,99 +1,241 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# js-hello
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+| Component | Responsibility |
+|---|---|
+| **Package Manager** | npm |
+| **Dependency file** | package.json |
+| **Source Code** | src/app.controller.ts, src/app.service.ts |
+| **Runtime** | Node.js (Express) |
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Dependencies
 
-## Description
+| Package | Purpose |
+|---|---|
+| @nestjs/core | NestJS core framework |
+| @nestjs/platform-express | HTTP server (Express) |
+| @nestjs/swagger | Swagger / OpenAPI documentation |
+| nestjs-pino / pino | Structured JSON logging |
+| rxjs | Reactive extensions |
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## NestJS — ข้อดีและข้อเสีย
 
-## Project setup
+### ข้อดี (Pros)
 
-```bash
-$ npm install
-```
+| ข้อดี | รายละเอียด |
+|---|---|
+| **โครงสร้างชัดเจน** | ใช้ Module / Controller / Service pattern (คล้าย Angular) ทำให้โค้ดเป็นระเบียบ แยก concern ได้ดี เหมาะกับ project ขนาดใหญ่ |
+| **TypeScript First** | สร้างมาเพื่อ TypeScript โดยเฉพาะ มี type safety, decorator, metadata reflection ช่วยลด bug ตั้งแต่ compile time |
+| **Dependency Injection** | มี built-in DI container ทำให้ test ง่าย mock ง่าย และจัดการ dependency ระหว่าง module ได้สะดวก |
+| **Ecosystem ครบ** | มี official module สำเร็จรูปสำหรับ database (TypeORM, Prisma), queue (Bull), WebSocket, GraphQL, gRPC, microservice transport |
+| **Swagger Integration** | ใช้ `@nestjs/swagger` + decorator ได้เลย generate OpenAPI spec อัตโนมัติจาก code |
+| **Testing Support** | มี `@nestjs/testing` สำหรับ unit test และ e2e test พร้อม Jest config ตั้งแต่ scaffold |
+| **Middleware & Guards** | Middleware, Guards, Interceptors, Pipes, Filters — ครบทุก layer สำหรับ request lifecycle |
+| **Active Community** | Community ใหญ่ มี documentation ดี มี official course และ enterprise support |
 
-## Compile and run the project
+### ข้อเสีย (Cons)
 
-```bash
-# development
-$ npm run start
+| ข้อเสีย | รายละเอียด |
+|---|---|
+| **Overhead สำหรับ project เล็ก** | โครงสร้าง Module/Controller/Service หนักเกินไปสำหรับ simple API ที่มีไม่กี่ route |
+| **Learning Curve** | ต้องเข้าใจ DI, decorator, module system, RxJS ซึ่งต่างจาก Express แบบดั้งเดิมมาก |
+| **Performance ต่ำกว่า** | มี abstraction layer หลายชั้น ทำให้ช้ากว่า raw Express หรือ Fastify โดยเฉพาะ high-throughput scenario |
+| **Decorator Magic** | Logic ซ่อนอยู่ใน decorator และ metadata reflection ทำให้ debug ยากเมื่อมีปัญหา |
+| **Bundle Size ใหญ่** | `node_modules` ใหญ่ รวม devDependencies แล้วหลายร้อย MB เทียบกับ minimal framework อย่าง Fastify หรือ Koa |
+| **Opinionated** | บังคับ pattern เยอะ ปรับแต่งโครงสร้างนอกแบบได้ยาก ไม่เหมาะกับคนที่ต้องการ flexibility สูง |
+| **Version Compatibility** | Major version upgrade (v9 → v10 → v11) อาจมี breaking changes กับ third-party module |
 
-# watch mode
-$ npm run start:dev
+---
 
-# production mode
-$ npm run start:prod
-```
+Node.js microservice built with [NestJS](https://nestjs.com/) framework (TypeScript) that returns a sample loan-service JSON log entry.
 
-## Run tests
+## Prerequisites
 
-```bash
-# unit tests
-$ npm run test
+- [Node.js](https://nodejs.org/) >= 18
+- [Docker](https://www.docker.com/) (optional)
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Run
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# Default (port 3000)
+npm run start
+
+# Custom port / log level
+PORT=8080 LOG_LEVEL=debug npm run start
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Server starts at **http://localhost:3000**
 
-## Resources
+## Swagger UI
 
-Check out a few resources that may come in handy when working with NestJS:
+Open **http://localhost:3000/swagger** in your browser to explore the API interactively.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The raw OpenAPI JSON spec is available at **http://localhost:3000/swagger-json**.
 
-## Support
+## Build
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Compile TypeScript
+npm run build
 
-## Stay in touch
+# Run production
+node dist/main
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Docker
 
-## License
+```bash
+# Build image
+docker build -t js-hello .
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Run container
+docker run -p 3000:3000 js-hello
+
+# Run with custom config
+docker run -p 8080:8080 -e PORT=8080 -e LOG_LEVEL=debug js-hello
+```
+
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `HOST` | `0.0.0.0` | Bind address |
+| `PORT` | `3000` | Listen port |
+| `LOG_LEVEL` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
+| `NODE_ENV` | `production` | Application environment |
+
+## API
+
+### `GET /`
+
+Returns a sample structured JSON log for a loan application request.
+
+**Response** `200 OK`
+
+```json
+{
+  "timestamp": "2026-03-18T14:10:25.123Z",
+  "level": "INFO",
+  "service": {
+    "name": "loan-service",
+    "version": "1.2.0",
+    "environment": "production"
+  },
+  "trace": {
+    "trace_id": "abc123xyz",
+    "span_id": "span-001",
+    "parent_span_id": null
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/loan/apply",
+    "query": {},
+    "headers": {
+      "x-request-id": "abc123xyz"
+    },
+    "body": {
+      "customer_id": 1001
+    },
+    "ip": "10.0.0.1",
+    "user_agent": "PostmanRuntime/7.32"
+  },
+  "response": {
+    "status_code": 200,
+    "body": {
+      "result": "success"
+    },
+    "duration_ms": 120
+  },
+  "user": {
+    "id": "u-1001",
+    "role": "customer"
+  },
+  "error": null,
+  "message": "Loan application processed successfully",
+  "tags": ["loan", "apply"],
+  "extra": {}
+}
+```
+
+### `GET /health`
+
+Health check endpoint for liveness/readiness probes.
+
+**Response** `200 OK`
+
+```json
+{ "status": "ok" }
+```
+
+## 12-Factor App
+
+แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
+
+### 1. Codebase — One codebase tracked in revision control
+
+- Source code อยู่ใน Git repository เดียว (`microservice/js-hello`)
+- Push ไปยัง GitHub: `theerayut99/aj-jojo-microservice-homework-day1`
+
+### 2. Dependencies — Explicitly declare and isolate dependencies
+
+- ประกาศ dependencies ทั้งหมดใน `package.json` พร้อม lock file `package-lock.json`
+- `npm ci` จะดึง dependencies จาก npm registry โดยอัตโนมัติ
+- Docker multi-stage build แยก devDependencies ออก runtime image มีแค่ production deps
+
+### 3. Config — Store config in the environment
+
+- `HOST`, `PORT`, `LOG_LEVEL`, `NODE_ENV` อ่านจาก `process.env`
+- ไม่มี hardcode config ใน source code — ทุกค่ามี default แต่ override ได้ผ่าน env
+- Dockerfile กำหนด `ENV HOST=0.0.0.0`, `ENV PORT=3000`, `ENV LOG_LEVEL=info`
+
+### 4. Backing Services — Treat backing services as attached resources
+
+- ปัจจุบัน project นี้ไม่มี backing service (database, cache, queue)
+- หากเพิ่มในอนาคต จะใช้ env vars สำหรับ connection string เช่น `DATABASE_URL`
+
+### 5. Build, Release, Run — Strictly separate build and run stages
+
+- **Build**: `npm run build` (TypeScript → JavaScript) ภายใน Docker builder stage
+- **Release**: Docker image (`js-hello:latest`) รวม dist + node_modules (production only)
+- **Run**: `docker run -p 3000:3000 -e PORT=3000 js-hello`
+- Dockerfile แยก builder stage (compile) กับ runtime stage (node:18-alpine) ชัดเจน
+
+### 6. Processes — Execute the app as one or more stateless processes
+
+- Application เป็น stateless process ตัวเดียว ไม่เก็บ state ใน memory หรือ disk
+- ทุก request ได้ response เดียวกัน ไม่มี session หรือ local storage
+
+### 7. Port Binding — Export services via port binding
+
+- NestJS bind port ผ่าน `app.listen(port, host)` ตาม env `PORT`
+- Dockerfile ใช้ `EXPOSE 3000` และ run ด้วย `-p 3000:3000`
+- เปลี่ยน port ได้ทันทีผ่าน `PORT=8080`
+
+### 8. Concurrency — Scale out via the process model
+
+- ใช้ Node.js event loop รองรับ concurrent requests ภายใน process เดียว
+- Scale horizontally ได้โดยรัน Docker container หลาย instance ด้วย load balancer
+
+### 9. Disposability — Maximize robustness with fast startup and graceful shutdown
+
+- Startup เร็ว — Node.js ไม่มี compile step ตอน runtime
+- Graceful shutdown ผ่าน `app.enableShutdownHooks()` รับ SIGTERM/SIGINT แล้วหยุดรับ request ใหม่ รอ request เดิมจบก่อนปิด
+- Dockerfile กำหนด `STOPSIGNAL SIGTERM`
+
+### 10. Dev/Prod Parity — Keep development, staging, and production as similar as possible
+
+- ใช้ Docker image เดียวกันทุก environment
+- Config ต่างกันเฉพาะ environment variables (`LOG_LEVEL=debug` vs `LOG_LEVEL=info`)
+- ไม่มี conditional code แยก dev/prod
+
+### 11. Logs — Treat logs as event streams
+
+- ใช้ `nestjs-pino` ส่ง structured JSON logs ไปยัง stdout
+- ทุก request log มี method, url, statusCode, responseTime ครบ
+- ควบคุม log level ผ่าน env `LOG_LEVEL` (เช่น `debug`, `info`, `warn`, `error`)
+- ไม่เขียน log file — ให้ log collector (Docker, CloudWatch, ELK) จัดการ
+
+### 12. Admin Processes — Run admin/management tasks as one-off processes
+
+- `GET /health` — health check สำหรับ Kubernetes liveness/readiness probe
+- Swagger UI ที่ `/swagger` สำหรับ API documentation
+- OpenAPI spec ที่ `/swagger-json` สำหรับ code generation
