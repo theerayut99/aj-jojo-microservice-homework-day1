@@ -168,6 +168,20 @@ Health check endpoint for liveness/readiness probes.
 
 ## 12-Factor App
 
+```
+js-hello/
+├── src/
+│   ├── main.ts              # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown)
+│   ├── app.module.ts        # Factor 2 (dependencies) — NestJS module with pino logger (Factor 11)
+│   ├── app.controller.ts    # API route handlers
+│   └── app.service.ts       # Business logic (stateless — Factor 6)
+├── Dockerfile               # Factor 5 (build/release/run) — multi-stage build
+├── package.json             # Factor 2 (dependencies) — explicit declaration
+├── package-lock.json        # Factor 2 — lock file for reproducible builds
+├── tsconfig.json            # TypeScript config
+└── dist/                    # Compiled JavaScript output
+```
+
 แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
 
 ### 1. Codebase — One codebase tracked in revision control
