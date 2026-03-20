@@ -168,6 +168,16 @@ Health check endpoint for liveness/readiness probes.
 
 ## 12-Factor App
 
+```
+rust-hello/
+├── src/
+│   └── main.rs            # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown), 11 (structured logs)
+├── Cargo.toml             # Factor 2 (dependencies) — explicit declaration
+├── Cargo.lock             # Factor 2 — lock file for reproducible builds
+├── Dockerfile             # Factor 5 (build/release/run) — multi-stage build
+└── .dockerignore          # Build optimization
+```
+
 แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
 
 ### 1. Codebase — One codebase tracked in revision control
