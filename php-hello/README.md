@@ -73,6 +73,18 @@ Open **http://localhost:9500/swagger** in your browser to explore the API intera
 
 The raw OpenAPI JSON spec is available at **http://localhost:9500/http.json**.
 
+## Build
+
+```bash
+# Development
+composer install
+php bin/hyperf.php start
+
+# Production (optimized autoload)
+composer install --no-dev -o
+php bin/hyperf.php start
+```
+
 ## Docker
 
 ```bash
@@ -160,6 +172,27 @@ Health check endpoint for liveness/readiness probes.
 ```
 
 ## 12-Factor App
+
+```
+php-hello/
+├── app/
+│   └── Controller/
+│       └── IndexController.php  # Factor 3 (env vars), 7 (port binding), 11 (structured logs)
+├── config/
+│   ├── autoload/
+│   │   ├── server.php           # Factor 7 (port binding) — Swoole server config
+│   │   ├── databases.php        # Factor 4 (backing services) — DB via env vars
+│   │   ├── redis.php            # Factor 4 (backing services) — Redis via env vars
+│   │   ├── logger.php           # Factor 11 (logs) — Monolog JSON to stdout
+│   │   └── swagger.php          # Swagger UI config
+│   └── routes.php               # Route definitions
+├── Dockerfile                   # Factor 5 (build/release/run) — single-stage build
+├── docker-compose.yml           # Local development environment
+├── .env.example                 # Factor 3 (config) — env var reference
+├── composer.json                # Factor 2 (dependencies) — explicit declaration
+├── composer.lock                # Factor 2 — lock file for reproducible builds
+└── bin/hyperf.php               # Factor 9 (disposability) — entry point with signal handling
+```
 
 แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
 
