@@ -3,13 +3,13 @@ set -euo pipefail
 
 # =============================================================================
 # HTTP Request Handler — forked per connection by socat
+# Factor 2: Dependencies — source shared config & logging library
 # =============================================================================
 
-SERVICE_NAME="${SERVICE_NAME:-loan-service}"
-SERVICE_VERSION="${SERVICE_VERSION:-1.2.0}"
-SERVICE_ENV="${SERVICE_ENV:-production}"
-LOG_LEVEL="${LOG_LEVEL:-info}"
 SCRIPT_DIR="${SCRIPT_DIR:-.}"
+
+# shellcheck source=lib.sh
+source "${SCRIPT_DIR}/lib.sh"
 
 # --- Read HTTP request from stdin ---
 read -r REQUEST_LINE || true
@@ -32,22 +32,6 @@ while IFS= read -r header; do
   esac
 done
 
-# --- Logging helper ---
-log_json() {
-  local level="$1" message="$2" extra="${3:-}"
-  local timestamp
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
-  local json
-  json=$(printf '{"timestamp":"%s","level":"%s","service":"%s","version":"%s","message":"%s"' \
-    "$timestamp" "$level" "$SERVICE_NAME" "$SERVICE_VERSION" "$message")
-  if [ -n "$extra" ]; then
-    json="${json},${extra}}"
-  else
-    json="${json}}"
-  fi
-  echo "$json" >&2
-}
-
 # --- HTTP response helper ---
 send_response() {
   local status_code="$1"
@@ -59,6 +43,9 @@ send_response() {
   printf "HTTP/1.1 %s %s\r\n" "$status_code" "$status_text"
   printf "Content-Type: %s\r\n" "$content_type"
   printf "Content-Length: %d\r\n" "$body_length"
+  printf "Access-Control-Allow-Origin: *\r\n"
+  printf "Access-Control-Allow-Methods: GET, OPTIONS\r\n"
+  printf "Access-Control-Allow-Headers: Content-Type\r\n"
   printf "Connection: close\r\n"
   printf "\r\n"
   printf "%s" "$body"
@@ -72,6 +59,12 @@ START_TIME=$(date +%s%N 2>/dev/null || echo "0")
 # =============================================================================
 
 case "$METHOD $PATH_INFO" in
+  "OPTIONS "*)
+    # --- CORS preflight ---
+    send_response 204 "No Content" "text/plain" ""
+    STATUS=204
+    ;;
+
   "GET /"|"GET")
     # --- Loan service log route ---
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -131,7 +124,7 @@ EOF
     STATUS=200
     ;;
 
-  "GET /swagger"|"GET /swagger/")
+  "GET /swagger"|"GET /swagger/"|"GET /swagger/index.html")
     # --- Swagger UI route ---
     SWAGGER_HTML=$(cat "${SCRIPT_DIR}/swagger.html")
     send_response 200 "OK" "text/html; charset=utf-8" "$SWAGGER_HTML"

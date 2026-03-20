@@ -7,8 +7,8 @@ RUN apk add --no-cache bash socat coreutils
 WORKDIR /app
 
 # Factor 1: Codebase — copy application scripts and static files
-COPY server.sh handler.sh swagger.html openapi.json ./
-RUN chmod +x server.sh handler.sh
+COPY server.sh handler.sh lib.sh swagger.html openapi.json ./
+RUN chmod +x server.sh handler.sh lib.sh
 
 # Factor 3: Config — environment variables with defaults
 ENV HOST=0.0.0.0

@@ -4,7 +4,7 @@
 |---|---|
 | **Package Manager** | N/A (OS package: apk) |
 | **Dependency file** | N/A (Dockerfile `apk add`) |
-| **Source Code** | server.sh, handler.sh |
+| **Source Code** | server.sh, handler.sh, lib.sh |
 | **OS executable file** | bash scripts (interpreted) |
 
 ## Dependencies
@@ -55,20 +55,12 @@ Bash microservice built with [socat](http://www.dest-unreach.org/socat/) that re
 ## Run
 
 ```bash
-# Local (requires bash + socat installed)
-chmod +x server.sh handler.sh
+# Default (port 3000)
+chmod +x server.sh handler.sh lib.sh
 ./server.sh
 
-# Using Docker (no local dependencies required)
-docker build -t bash-hello .
-docker run -p 3000:3000 bash-hello
-
-# Custom config
-docker run -p 3000:3000 \
-  -e SERVICE_NAME=my-service \
-  -e SERVICE_ENV=staging \
-  -e LOG_LEVEL=debug \
-  bash-hello
+# Custom port / log level
+PORT=8080 LOG_LEVEL=debug ./server.sh
 ```
 
 Server starts at **http://localhost:3000**
@@ -84,7 +76,7 @@ The raw OpenAPI JSON spec is available at **http://localhost:3000/swagger/doc.js
 ```bash
 # No build step required — scripts are interpreted
 # Just ensure scripts are executable:
-chmod +x server.sh handler.sh
+chmod +x server.sh handler.sh lib.sh
 ```
 
 ## Docker
@@ -182,13 +174,15 @@ Health check endpoint for liveness/readiness probes.
 
 ```
 bash-hello/
-├── server.sh        # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown), 11 (structured logs)
-├── handler.sh       # HTTP request handler — routes, response, access logging
+├── lib.sh           # Factor 2 (shared module), 3 (env config), 11 (log_json with level filtering)
+├── server.sh        # Factor 7 (port binding), 9 (graceful shutdown) — sources lib.sh
+├── handler.sh       # HTTP request handler — routes, response, access logging — sources lib.sh
 ├── swagger.html     # Swagger UI (static HTML)
 ├── openapi.json     # OpenAPI 3.0.3 spec
 ├── Dockerfile       # Factor 5 (build/release/run) — single-stage Alpine image
 ├── Procfile         # Factor 6 (processes) — process type declaration
 ├── .env.example     # Factor 3 (config) — env var reference
+├── .dockerignore    # Build optimization
 └── .gitignore       # Version control ignore rules
 ```
 
@@ -202,14 +196,17 @@ bash-hello/
 ### 2. Dependencies — Explicitly declare and isolate dependencies
 
 - Dependencies ประกาศใน Dockerfile ผ่าน `apk add --no-cache bash socat coreutils`
-- ไม่มี package manager แยก — ใช้ OS-level package management ของ Alpine
+- Shared library (`lib.sh`) รวม config loading และ logging ไว้ที่เดียว — ทั้ง `server.sh` และ `handler.sh` ใช้ `source lib.sh`
+- ไม่มี code duplication — config defaults และ `log_json()` อยู่ใน `lib.sh` เท่านั้น
 - Docker image รวม dependencies ทั้งหมดไว้ใน layer เดียว
 
 ### 3. Config — Store config in the environment
 
-- `HOST`, `PORT`, `SERVICE_NAME`, `SERVICE_VERSION`, `SERVICE_ENV`, `LOG_LEVEL` อ่านจาก environment variables
+- `HOST`, `PORT`, `SERVICE_NAME`, `SERVICE_VERSION`, `SERVICE_ENV`, `LOG_LEVEL` อ่านจาก environment variables ผ่าน `lib.sh`
+- Config loading อยู่ในที่เดียว (`lib.sh`) — server.sh และ handler.sh ไม่ duplicate defaults
 - ไม่มี hardcode config ใน script — ทุกค่ามี default ผ่าน `${VAR:-default}` syntax
 - Dockerfile กำหนด `ENV` สำหรับทุก config variable
+- Startup log แสดง config ทั้งหมด: host, port, environment, log_level
 
 ### 4. Backing Services — Treat backing services as attached resources
 
@@ -256,9 +253,11 @@ bash-hello/
 
 ### 11. Logs — Treat logs as event streams
 
-- ใช้ `log_json()` ส่ง structured JSON logs ไปยัง stdout (server.sh) และ stderr (handler.sh)
-- ควบคุม log level ผ่าน env `LOG_LEVEL` (เช่น `debug`, `info`, `warn`, `error`)
-- Access log แสดง method, path, status, duration_ms ในรูปแบบ JSON
+- ใช้ `log_json()` จาก `lib.sh` — ทั้ง server.sh และ handler.sh ใช้ function เดียวกัน
+- Structured JSON logs ส่งไปยัง stderr (captured by Docker as combined stream)
+- ควบคุม log level ผ่าน env `LOG_LEVEL` พร้อม priority filtering (DEBUG < INFO < WARN < ERROR)
+- Access log แสดง method, path, status, duration_ms, user_agent ในรูปแบบ JSON
+- Startup log แสดง config ครบทุกค่า (host, port, environment, log_level)
 - ไม่เขียน log file — ให้ log collector (Docker, CloudWatch, ELK) จัดการ
 
 ### 12. Admin Processes — Run admin/management tasks as one-off processes
