@@ -11,6 +11,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Factor 7: Port Binding — endpoints exposed via embedded Tomcat.
+ * Factor 6: Processes — stateless request handling, no session or local storage.
+ * Factor 12: Admin Processes — /health for K8s probes.
+ */
 @RestController
 public class LoanController {
 

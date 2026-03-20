@@ -80,6 +80,8 @@ Open **http://localhost:8080/swagger/index.html** in your browser to explore the
 
 The raw OpenAPI JSON spec is available at **http://localhost:8080/v3/api-docs**.
 
+The static OpenAPI spec file is at [openapi.json](openapi.json).
+
 ## Build
 
 ```bash
@@ -189,19 +191,24 @@ java-spring-boot-maven-hello/
 ├── src/
 │   └── main/
 │       ├── java/com/example/loanhello/
-│       │   ├── LoanHelloApplication.java            # Factor 9 (startup)
+│       │   ├── LoanHelloApplication.java            # Factor 9 (startup/shutdown logging)
 │       │   ├── config/
 │       │   │   ├── ServiceConfig.java               # Factor 3 (config from env)
-│       │   │   └── OpenApiConfig.java               # Swagger/OpenAPI config
+│       │   │   ├── OpenApiConfig.java               # Swagger/OpenAPI config
+│       │   │   └── RequestLoggingFilter.java        # Factor 11 (structured access logs)
 │       │   ├── controller/
-│       │   │   └── LoanController.java              # Factor 7 (port binding), 12 (admin)
+│       │   │   ├── LoanController.java              # Factor 7 (port binding), 6 (stateless), 12 (admin)
+│       │   │   └── SwaggerController.java           # Swagger UI routing
 │       │   └── model/
 │       │       ├── LoanLogResponse.java             # Domain model (response DTO)
 │       │       └── HealthResponse.java              # Health check DTO
 │       └── resources/
-│           ├── application.properties               # Factor 3 (config), 7 (port)
-│           └── logback-spring.xml                   # Factor 11 (structured logs)
-├── Dockerfile                                       # Factor 5 (build/release/run)
+│           ├── application.properties               # Factor 3 (config), 7 (port), 9 (graceful shutdown)
+│           ├── logback-spring.xml                   # Factor 11 (structured JSON logs to stdout)
+│           └── static/
+│               └── swagger.html                     # Swagger UI (CDN-based, StandalonePreset)
+├── openapi.json                                     # OpenAPI 3.0.3 spec (static)
+├── Dockerfile                                       # Factor 5 (build/release/run) — multi-stage
 ├── Procfile                                         # Factor 6 (processes)
 ├── .env.example                                     # Factor 3 (config reference)
 ├── .gitignore
@@ -261,9 +268,10 @@ java-spring-boot-maven-hello/
 ### 9. Disposability — Maximize robustness with fast startup and graceful shutdown
 
 - Spring Boot 3.4 startup 1-3 วินาที — ยอมรับได้สำหรับ JVM application
-- Graceful shutdown ผ่าน Spring lifecycle — drain connections ก่อน shutdown
+- `server.shutdown=graceful` + `spring.lifecycle.timeout-per-shutdown-phase=10s` drain connections ภายใน 10 วินาทีก่อน shutdown
 - Dockerfile ใช้ `STOPSIGNAL SIGTERM` ให้ Docker ส่ง SIGTERM แทน SIGKILL
 - JVM handles SIGTERM → Spring ApplicationContext close → graceful shutdown
+- `@EventListener(ApplicationReadyEvent.class)` และ `@EventListener(ContextClosedEvent.class)` log startup/shutdown events
 
 ### 10. Dev/Prod Parity — Keep development, staging, and production as similar as possible
 
@@ -275,6 +283,8 @@ java-spring-boot-maven-hello/
 
 - ใช้ `logstash-logback-encoder` ส่ง structured JSON logs ไปยัง stdout
 - `logback-spring.xml` configure ConsoleAppender + LogstashEncoder
+- `RequestLoggingFilter` บันทึก access log ทุก request (method, path, status, duration_ms, ip, user_agent) เป็น structured JSON
+- `LoanHelloApplication` log startup/shutdown events พร้อม structured fields (port, environment, log_level)
 - ควบคุม log level ผ่าน env `LOG_LEVEL` — filter ตาม priority: `DEBUG` < `INFO` < `WARN` < `ERROR`
 - ไม่เขียน log file — ให้ log collector (Docker, CloudWatch, ELK) จัดการ
 
@@ -283,3 +293,4 @@ java-spring-boot-maven-hello/
 - `GET /health` — health check สำหรับ Kubernetes liveness/readiness probe
 - Spring Boot Actuator `/actuator/health` — built-in health endpoint
 - Swagger UI ที่ `/swagger/index.html` สำหรับ API documentation
+- OpenAPI spec ที่ `/v3/api-docs` สำหรับ code generation

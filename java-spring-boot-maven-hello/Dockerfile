@@ -1,3 +1,8 @@
+# ==============================================================================
+# Factor 5: Build, Release, Run — Strictly separate build and run stages
+# Factor 2: Dependencies — Explicitly declare and isolate dependencies
+# ==============================================================================
+
 # ---- Build Stage ----
 # Factor 2: Dependencies — Maven manages all dependencies via pom.xml
 FROM maven:3-eclipse-temurin-21-alpine AS builder
