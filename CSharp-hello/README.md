@@ -164,6 +164,19 @@ Health check endpoint for liveness/readiness probes.
 
 ## 12-Factor App
 
+```
+CSharp-hello/
+├── Program.cs                     # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown), 11 (structured logs)
+├── CSharp-hello.csproj            # Factor 2 (dependencies) — NuGet package declaration
+├── appsettings.json               # Factor 10 (dev/prod parity) — base config
+├── appsettings.Development.json   # Factor 10 — dev-specific overrides
+├── Properties/
+│   └── launchSettings.json        # Development launch profiles
+├── Dockerfile                     # Factor 5 (build/release/run) — multi-stage build
+├── .dockerignore                  # Build optimization
+└── .gitignore                     # Version control
+```
+
 แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
 
 ### 1. Codebase — One codebase tracked in revision control
