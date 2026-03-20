@@ -1,0 +1,20 @@
+# Build output
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# Env
+.env
