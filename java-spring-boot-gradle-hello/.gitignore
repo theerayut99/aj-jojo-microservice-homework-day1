@@ -1,0 +1,21 @@
+# Build output
+build/
+.gradle/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gradle
+*.log
+gradle/wrapper/gradle-wrapper.jar
+
+# Env
+.env
