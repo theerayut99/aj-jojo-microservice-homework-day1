@@ -76,6 +76,20 @@ ReDoc is also available at **http://localhost:8000/redoc**.
 
 The raw OpenAPI JSON spec is available at **http://localhost:8000/openapi.json**.
 
+## Build
+
+```bash
+# Development
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+# Production
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
 ## Docker
 
 ```bash
@@ -161,6 +175,15 @@ Health check endpoint for liveness/readiness probes.
 ```
 
 ## 12-Factor App
+
+```
+python-hello/
+├── main.py                # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown), 11 (structured logs)
+├── requirements.txt       # Factor 2 (dependencies) — explicit declaration
+├── Dockerfile             # Factor 5 (build/release/run) — single-stage build
+├── .dockerignore          # Build optimization
+└── .gitignore             # Version control
+```
 
 แต่ละข้อของ [The Twelve-Factor App](https://12factor.net/) ถูกนำมาใช้ใน project นี้ดังนี้:
 
