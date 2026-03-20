@@ -75,6 +75,9 @@ OpenAPI spec: http://localhost:8082/openapi.json
 docker build -t dart-hello .
 docker run -d --name dart-hello \
   -p 8080:8080 -p 8081:8081 -p 8082:8082 \
+  -e SERVICE_NAME=loan-service \
+  -e SERVICE_ENV=production \
+  -e LOG_LEVEL=info \
   dart-hello
 ```
 
@@ -82,12 +85,16 @@ Image ใช้ `dart compile exe` แล้วรันบน Alpine Linux
 
 ## Environment Variables
 
-| Variable   | Default      | Description                    |
-| ---------- | ------------ | ------------------------------ |
-| `runmode`  | `production` | Serverpod run mode             |
-| `serverid` | `default`    | Server identifier              |
-| `logging`  | `normal`     | Logging mode                   |
-| `role`     | `monolith`   | Server role                    |
+| Variable          | Default        | Description                              |
+| ----------------- | -------------- | ---------------------------------------- |
+| `SERVICE_NAME`    | `loan-service` | Service name in logs & response          |
+| `SERVICE_VERSION` | `1.2.0`        | Service version in logs & response       |
+| `SERVICE_ENV`     | `production`   | Environment name (production/staging)    |
+| `LOG_LEVEL`       | `info`         | Log level (debug/info/warn/error)        |
+| `runmode`         | `production`   | Serverpod run mode                       |
+| `serverid`        | `default`      | Server identifier                        |
+| `logging`         | `normal`       | Serverpod logging mode                   |
+| `role`            | `monolith`     | Server role                              |
 
 ## API (Web Server — port 8082)
 
@@ -100,17 +107,33 @@ Image ใช้ `dart compile exe` แล้วรันบน Alpine Linux
 
 ## 12-Factor App
 
-| Factor                | Implementation                                              |
-| --------------------- | ----------------------------------------------------------- |
-| I. Codebase           | Git monorepo, one codebase per service                      |
-| II. Dependencies      | pubspec.yaml + dart pub get                                 |
-| III. Config           | Environment variables (runmode, serverid, logging, role)    |
-| IV. Backing services  | N/A (Mini mode, no database)                                |
-| V. Build, release, run| Docker multi-stage: compile exe → Alpine image              |
-| VI. Processes         | Stateless server, no shared state                           |
-| VII. Port binding     | Self-contained HTTP servers (3 ports)                       |
-| VIII. Concurrency     | Dart isolates / container scaling                           |
-| IX. Disposability     | SIGTERM graceful shutdown (STOPSIGNAL)                      |
-| X. Dev/prod parity    | Same Docker image, config via run mode                      |
-| XI. Logs              | Serverpod built-in structured logging to stdout             |
-| XII. Admin processes  | N/A                                                         |
+| Factor                 | Implementation                                                                                       |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| I. Codebase            | Git monorepo — one codebase tracked in version control, many deploys                                 |
+| II. Dependencies       | `pubspec.yaml` + `dart pub get` — explicitly declared and isolated                                   |
+| III. Config            | Environment variables (`SERVICE_NAME`, `SERVICE_ENV`, `LOG_LEVEL`, etc.) — never hardcoded in source |
+| IV. Backing services   | N/A (Mini mode, no database) — ready to attach via env vars when needed                              |
+| V. Build, release, run | Docker multi-stage: `dart compile exe` → Alpine image — strict separation                            |
+| VI. Processes          | Stateless server — no shared in-memory state between requests                                        |
+| VII. Port binding      | Self-contained HTTP servers via Serverpod (API:8080, Insights:8081, Web:8082)                        |
+| VIII. Concurrency      | Horizontal scaling via containers; Dart isolates for vertical scaling                                |
+| IX. Disposability      | `ProcessSignal.sigterm/sigint` listeners + `STOPSIGNAL SIGTERM` — fast startup, graceful shutdown    |
+| X. Dev/prod parity     | Same Docker image across environments — config differs only via env vars                             |
+| XI. Logs               | Structured JSON log events written to `stdout` via `_log()` — no log files                           |
+| XII. Admin processes   | Run one-off commands in same container: `docker exec <c> ./server --mode=production --role=maintenance` |
+
+### โครงสร้าง 12-Factor ใน Code
+
+```
+dart-hello/
+├── bin/main.dart          # Factor 3 (env vars), 7 (port binding), 9 (graceful shutdown), 11 (structured logs)
+├── config/                # Factor 10 (dev/prod parity) — Serverpod YAML configs
+│   ├── development.yaml
+│   ├── production.yaml
+│   └── passwords.yaml
+├── Dockerfile             # Factor 5 (build/release/run) — multi-stage build
+├── Procfile               # Factor 6 (processes) — process type declaration
+├── .env.example           # Factor 3 (config) — env var reference
+├── pubspec.yaml           # Factor 2 (dependencies) — explicit declaration
+└── lib/src/generated/     # Factor 2 — internal dependency (Serverpod stubs)
+```
