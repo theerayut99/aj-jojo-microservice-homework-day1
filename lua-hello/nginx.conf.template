@@ -1,0 +1,55 @@
+worker_processes auto;
+error_log /dev/stderr info;
+pid /tmp/nginx.pid;
+
+env SERVICE_NAME;
+env SERVICE_VERSION;
+env SERVICE_ENV;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    access_log /dev/stdout;
+
+    lua_package_path "/usr/local/openresty/lualib/?.lua;/app/lua/?.lua;;";
+
+    init_by_lua_block {
+        local service_name = os.getenv("SERVICE_NAME") or "loan-service"
+        ngx.log(ngx.INFO, "Starting " .. service_name .. " on OpenResty")
+    }
+
+    server {
+        listen ${PORT};
+        server_name _;
+
+        location = / {
+            content_by_lua_block {
+                local app = require "app"
+                app.index()
+            }
+        }
+
+        location = /health {
+            content_by_lua_block {
+                local app = require "app"
+                app.health()
+            }
+        }
+
+        location = /swagger {
+            content_by_lua_block {
+                local swagger = require "swagger"
+                swagger.ui()
+            }
+        }
+
+        location = /openapi.json {
+            content_by_lua_block {
+                local swagger = require "swagger"
+                swagger.spec()
+            }
+        }
+    }
+}

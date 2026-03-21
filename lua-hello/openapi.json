@@ -1,0 +1,231 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Loan Service API",
+        "description": "Lua + OpenResty microservice that returns a sample loan-service JSON log entry",
+        "version": "1.2.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Local development"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "Get loan log entry",
+                "description": "Returns a sample structured JSON log for a loan application request",
+                "operationId": "getLoanLog",
+                "tags": [
+                    "Loan"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoanLogResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "summary": "Health check",
+                "description": "Health check endpoint for liveness/readiness probes",
+                "operationId": "healthCheck",
+                "tags": [
+                    "Health"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HealthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "LoanLogResponse": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-03-18T14:10:25.123Z"
+                    },
+                    "level": {
+                        "type": "string",
+                        "example": "INFO"
+                    },
+                    "service": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "example": "loan-service"
+                            },
+                            "version": {
+                                "type": "string",
+                                "example": "1.2.0"
+                            },
+                            "environment": {
+                                "type": "string",
+                                "example": "production"
+                            }
+                        }
+                    },
+                    "trace": {
+                        "type": "object",
+                        "properties": {
+                            "trace_id": {
+                                "type": "string",
+                                "example": "abc123xyz"
+                            },
+                            "span_id": {
+                                "type": "string",
+                                "example": "span-001"
+                            },
+                            "parent_span_id": {
+                                "type": "string",
+                                "nullable": true,
+                                "example": null
+                            }
+                        }
+                    },
+                    "request": {
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string",
+                                "example": "POST"
+                            },
+                            "path": {
+                                "type": "string",
+                                "example": "/api/v1/loan/apply"
+                            },
+                            "query": {
+                                "type": "object",
+                                "example": {}
+                            },
+                            "headers": {
+                                "type": "object",
+                                "properties": {
+                                    "x-request-id": {
+                                        "type": "string",
+                                        "example": "abc123xyz"
+                                    }
+                                }
+                            },
+                            "body": {
+                                "type": "object",
+                                "properties": {
+                                    "customer_id": {
+                                        "type": "integer",
+                                        "example": 1001
+                                    }
+                                }
+                            },
+                            "ip": {
+                                "type": "string",
+                                "example": "10.0.0.1"
+                            },
+                            "user_agent": {
+                                "type": "string",
+                                "example": "PostmanRuntime/7.32"
+                            }
+                        }
+                    },
+                    "response": {
+                        "type": "object",
+                        "properties": {
+                            "status_code": {
+                                "type": "integer",
+                                "example": 200
+                            },
+                            "body": {
+                                "type": "object",
+                                "properties": {
+                                    "result": {
+                                        "type": "string",
+                                        "example": "success"
+                                    }
+                                }
+                            },
+                            "duration_ms": {
+                                "type": "integer",
+                                "example": 120
+                            }
+                        }
+                    },
+                    "user": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "example": "u-1001"
+                            },
+                            "role": {
+                                "type": "string",
+                                "example": "customer"
+                            }
+                        }
+                    },
+                    "error": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": null
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Loan application processed successfully"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "loan",
+                            "apply"
+                        ]
+                    },
+                    "extra": {
+                        "type": "object",
+                        "example": {}
+                    }
+                }
+            },
+            "HealthResponse": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "ok"
+                    },
+                    "service": {
+                        "type": "string",
+                        "example": "loan-service"
+                    },
+                    "version": {
+                        "type": "string",
+                        "example": "1.2.0"
+                    }
+                }
+            }
+        }
+    }
+}
