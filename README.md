@@ -166,11 +166,14 @@
 cd _docker-orchestrator
 cargo build --release
 
-# Start ทุก service
+# Start ทุก service พร้อมกับ Build Docker Image ใหม่
+./target/release/dockrun up --build
+
+# Start ทุก service (ดึงจาก Image ล่าสุดที่เคย build ไว้)
 ./target/release/dockrun up
 
-# Start เฉพาะบาง service
-./target/release/dockrun up -s rust-hello,go-hello
+# Start เฉพาะบาง service พร้อมกับสั่ง Build ด้วย
+./target/release/dockrun up --build -s rust-hello,go-hello
 
 # ดูสถานะ
 ./target/release/dockrun status
