@@ -19,3 +19,5 @@ gradle/wrapper/gradle-wrapper.jar
 
 # Env
 .env
+
+bin/

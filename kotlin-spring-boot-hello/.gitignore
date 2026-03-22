@@ -5,3 +5,5 @@ build/
 out/
 *.iml
 .idea/
+.kotlin/
+bin/
