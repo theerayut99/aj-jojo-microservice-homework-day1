@@ -267,6 +267,65 @@ func getLoanLog(c *gin.Context) {
 	c.JSON(http.StatusOK, body)
 }
 
+// postLoanLog godoc
+// @Summary      Receive loan service webhook
+// @Description  Accepts an event payload and returns a sample structured JSON log
+// @Tags         loan
+// @Accept       json
+// @Produce      json
+// @Param        payload body any true "Webhook Event Payload"
+// @Success      200 {object} LoanLogResponse
+// @Router       / [post]
+func postLoanLog(c *gin.Context) {
+	var payload map[string]interface{}
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		payload = map[string]interface{}{}
+	}
+
+	body := gin.H{
+		"timestamp": time.Now().UTC().Format(time.RFC3339Nano),
+		"level":     "INFO",
+		"service": gin.H{
+			"name":        cfg.ServiceName,
+			"version":     cfg.ServiceVersion,
+			"environment": cfg.ServiceEnv,
+		},
+		"trace": gin.H{
+			"trace_id":       "abc123xyz",
+			"span_id":        "span-001",
+			"parent_span_id": nil,
+		},
+		"request": gin.H{
+			"method": "POST",
+			"path":   "/api/v1/loan/apply",
+			"query":  gin.H{},
+			"headers": gin.H{
+				"x-request-id": "abc123xyz",
+			},
+			"body":       payload,
+			"ip":         "10.0.0.1",
+			"user_agent": "PostmanRuntime/7.32",
+		},
+		"response": gin.H{
+			"status_code": 200,
+			"body": gin.H{
+				"result": "success",
+			},
+			"duration_ms": 120,
+		},
+		"user": gin.H{
+			"id":   "u-1001",
+			"role": "customer",
+		},
+		"error":   nil,
+		"message": "Webhook event processed successfully",
+		"tags":    []string{"loan", "webhook", "apply"},
+		"extra":   gin.H{},
+	}
+
+	c.JSON(http.StatusOK, body)
+}
+
 // healthCheck godoc
 // @Summary      Health check
 // @Description  Health check endpoint for liveness/readiness probes
@@ -308,6 +367,7 @@ func main() {
 
 	// Factor 7: Port binding — register routes on self-contained HTTP server
 	r.GET("/", getLoanLog)
+	r.POST("/", postLoanLog)
 	r.GET("/health", healthCheck)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

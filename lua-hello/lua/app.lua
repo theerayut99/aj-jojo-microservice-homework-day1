@@ -5,6 +5,20 @@ local _M = {}
 function _M.index()
     ngx.header["Content-Type"] = "application/json"
 
+    local method = ngx.req.get_method()
+    local payload = { customer_id = 1001 }
+
+    if method == "POST" then
+        ngx.req.read_body()
+        local req_body = ngx.req.get_body_data()
+        if req_body then
+            local success, parsed = pcall(cjson.decode, req_body)
+            if success and type(parsed) == "table" then
+                payload = parsed
+            end
+        end
+    end
+
     local response = {
         timestamp = "2026-03-18T14:10:25.123Z",
         level = "INFO",
@@ -25,9 +39,7 @@ function _M.index()
             headers = {
                 ["x-request-id"] = "abc123xyz"
             },
-            body = {
-                customer_id = 1001
-            },
+            body = payload,
             ip = "10.0.0.1",
             user_agent = "PostmanRuntime/7.32"
         },
@@ -43,8 +55,9 @@ function _M.index()
             role = "customer"
         },
         error = cjson.null,
-        message = "Loan application processed successfully",
-        tags = { "loan", "apply" },
+        error = cjson.null,
+        message = method == "POST" and "Webhook event processed successfully" or "Loan application processed successfully",
+        tags = method == "POST" and { "loan", "webhook", "apply" } or { "loan", "apply" },
         extra = {}
     }
 

@@ -56,6 +56,30 @@ public record LoanLogResponse(
         );
     }
 
+    public static LoanLogResponse createWebhookEvent(String serviceName, String serviceVersion, String serviceEnv, Object payload) {
+        return new LoanLogResponse(
+                Instant.now().toString(),
+                "INFO",
+                new ServiceInfo(serviceName, serviceVersion, serviceEnv),
+                new TraceInfo("abc123xyz", "span-001", null),
+                new RequestInfo(
+                        "POST",
+                        "/api/v1/loan/apply",
+                        Map.of(),
+                        new RequestHeaders("abc123xyz"),
+                        payload != null ? payload : Map.of(),
+                        "10.0.0.1",
+                        "PostmanRuntime/7.32"
+                ),
+                new ResponseInfo(200, new ResponseBody("success"), 120),
+                new UserInfo("u-1001", "customer"),
+                null,
+                "Webhook event processed successfully",
+                List.of("loan", "webhook", "apply"),
+                Map.of()
+        );
+    }
+
     @Schema(description = "Service information")
     public record ServiceInfo(
             @Schema(example = "loan-service") String name,
@@ -76,7 +100,7 @@ public record LoanLogResponse(
             @Schema(example = "/api/v1/loan/apply") String path,
             Map<String, Object> query,
             RequestHeaders headers,
-            RequestBody body,
+            Object body,
             @Schema(example = "10.0.0.1") String ip,
             @JsonProperty("user_agent") @Schema(example = "PostmanRuntime/7.32") String userAgent
     ) {}

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -33,6 +35,16 @@ public class LoanController {
     @GetMapping("/")
     public LoanLogResponse getLoanLog() {
         return LoanLogResponse.create(config.getName(), config.getVersion(), config.getEnvironment());
+    }
+
+    @Tag(name = "loan")
+    @Operation(summary = "Receive loan service webhook",
+               description = "Accepts an event payload and returns a webhook processed response")
+    @ApiResponse(responseCode = "200", description = "OK",
+                 content = @Content(schema = @Schema(implementation = LoanLogResponse.class)))
+    @PostMapping("/")
+    public LoanLogResponse postLoanLog(@RequestBody(required = false) java.util.Map<String, Object> payload) {
+        return LoanLogResponse.createWebhookEvent(config.getName(), config.getVersion(), config.getEnvironment(), payload);
     }
 
     @Tag(name = "health")

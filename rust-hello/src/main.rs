@@ -1,4 +1,4 @@
-use axum::{routing::get, Json, Router};
+use axum::{routing::{get, post}, Json, Router};
 use serde_json::{json, Value};
 use std::env;
 use tokio::signal;
@@ -12,7 +12,8 @@ use utoipa_swagger_ui::SwaggerUi;
         version = "1.2.0",
         description = "Rust microservice that returns a sample loan-service JSON log entry"
     ),
-    paths(root, health)
+    ),
+    paths(root, health, post_webhook)
 )]
 struct ApiDoc;
 
@@ -33,7 +34,7 @@ async fn main() {
     let addr = format!("{host}:{port}");
 
     let app = Router::new()
-        .route("/", get(root))
+        .route("/", get(root).post(post_webhook))
         .route("/health", get(health))
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()));
 
@@ -131,6 +132,62 @@ async fn root() -> Json<Value> {
         "error": null,
         "message": "Loan application processed successfully",
         "tags": ["loan", "apply"],
+        "extra": {}
+    }))
+}
+
+#[utoipa::path(
+    post,
+    path = "/",
+    request_body = Option<Value>,
+    responses(
+        (status = 200, description = "Webhook event processed successfully", body = Value)
+    )
+)]
+async fn post_webhook(payload: Option<Json<Value>>) -> Json<Value> {
+    let body_value = match payload {
+        Some(Json(val)) => val,
+        None => json!({}),
+    };
+
+    Json(json!({
+        "timestamp": "2026-03-18T14:10:25.123Z",
+        "level": "INFO",
+        "service": {
+            "name": "loan-service",
+            "version": "1.2.0",
+            "environment": "production"
+        },
+        "trace": {
+            "trace_id": "abc123xyz",
+            "span_id": "span-001",
+            "parent_span_id": null
+        },
+        "request": {
+            "method": "POST",
+            "path": "/api/v1/loan/apply",
+            "query": {},
+            "headers": {
+                "x-request-id": "abc123xyz"
+            },
+            "body": body_value,
+            "ip": "10.0.0.1",
+            "user_agent": "PostmanRuntime/7.32"
+        },
+        "response": {
+            "status_code": 200,
+            "body": {
+                "result": "success"
+            },
+            "duration_ms": 120
+        },
+        "user": {
+            "id": "u-1001",
+            "role": "customer"
+        },
+        "error": null,
+        "message": "Webhook event processed successfully",
+        "tags": ["loan", "webhook", "apply"],
         "extra": {}
     }))
 }

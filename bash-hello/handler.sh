@@ -117,6 +117,62 @@ EOF
     STATUS=200
     ;;
 
+  "POST /"|"POST")
+    # --- Webhook event route ---
+    PAYLOAD="{}"
+    if [ -n "${CONTENT_LENGTH:-}" ] && [ "$CONTENT_LENGTH" -gt 0 ] 2>/dev/null; then
+      PAYLOAD=$(head -c "$CONTENT_LENGTH")
+    fi
+    [ -z "$PAYLOAD" ] && PAYLOAD="{}"
+
+    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.%3NZ" 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%SZ")
+    BODY=$(cat <<EOF
+{
+  "timestamp": "${TIMESTAMP}",
+  "level": "INFO",
+  "service": {
+    "name": "${SERVICE_NAME}",
+    "version": "${SERVICE_VERSION}",
+    "environment": "${SERVICE_ENV}"
+  },
+  "trace": {
+    "trace_id": "abc123xyz",
+    "span_id": "span-001",
+    "parent_span_id": null
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/loan/apply",
+    "query": {},
+    "headers": {
+      "x-request-id": "abc123xyz"
+    },
+    "body": ${PAYLOAD},
+    "ip": "10.0.0.1",
+    "user_agent": "PostmanRuntime/7.32"
+  },
+  "response": {
+    "status_code": 200,
+    "body": {
+      "result": "success"
+    },
+    "duration_ms": 120
+  },
+  "user": {
+    "id": "u-1001",
+    "role": "customer"
+  },
+  "error": null,
+  "message": "Webhook event processed successfully",
+  "tags": ["loan", "webhook", "apply"],
+  "extra": {}
+}
+EOF
+)
+    send_response 200 "OK" "application/json" "$BODY"
+    STATUS=200
+    ;;
+
   "GET /health")
     # --- Health check route ---
     BODY=$(printf '{"status":"ok","service":"%s","version":"%s"}' "$SERVICE_NAME" "$SERVICE_VERSION")

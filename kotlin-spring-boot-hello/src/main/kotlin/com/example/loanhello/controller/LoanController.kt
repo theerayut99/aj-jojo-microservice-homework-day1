@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -18,6 +20,12 @@ class LoanController(private val config: ServiceConfig) {
     @ApiResponse(responseCode = "200", description = "Successful response")
     fun index(): LoanLogResponse =
         LoanLogResponse.create(config.name, config.version, config.environment)
+
+    @PostMapping("/")
+    @Operation(summary = "Receive loan service webhook", description = "Accepts an event payload and returns a webhook processed response")
+    @ApiResponse(responseCode = "200", description = "Successful response")
+    fun postWebhook(@RequestBody(required = false) payload: Any?): LoanLogResponse =
+        LoanLogResponse.createWebhookEvent(config.name, config.version, config.environment, payload)
 
     @GetMapping("/health")
     @Operation(summary = "Health check", description = "Health check endpoint for liveness/readiness probes")

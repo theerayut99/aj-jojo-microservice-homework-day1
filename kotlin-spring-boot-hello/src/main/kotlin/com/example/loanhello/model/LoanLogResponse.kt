@@ -50,6 +50,28 @@ data class LoanLogResponse(
             tags = listOf("loan", "apply"),
             extra = emptyMap()
         )
+
+        fun createWebhookEvent(serviceName: String, serviceVersion: String, serviceEnv: String, payload: Any?) = LoanLogResponse(
+            timestamp = java.time.Instant.now().toString(),
+            level = "INFO",
+            service = ServiceInfo(serviceName, serviceVersion, serviceEnv),
+            trace = TraceInfo("abc123xyz", "span-001", null),
+            request = RequestInfo(
+                method = "POST",
+                path = "/api/v1/loan/apply",
+                query = emptyMap(),
+                headers = RequestHeaders("abc123xyz"),
+                body = payload ?: emptyMap<String, Any>(),
+                ip = "10.0.0.1",
+                userAgent = "PostmanRuntime/7.32"
+            ),
+            response = ResponseInfo(200, ResponseBody("success"), 120),
+            user = UserInfo("u-1001", "customer"),
+            error = null,
+            message = "Webhook event processed successfully",
+            tags = listOf("loan", "webhook", "apply"),
+            extra = emptyMap()
+        )
     }
 }
 
@@ -73,7 +95,7 @@ data class RequestInfo(
     @Schema(example = "/api/v1/loan/apply") val path: String,
     val query: Map<String, Any>,
     val headers: RequestHeaders,
-    val body: RequestBody,
+    val body: Any,
     @Schema(example = "10.0.0.1") val ip: String,
     @get:JsonProperty("user_agent") @Schema(example = "PostmanRuntime/7.32") val userAgent: String
 )

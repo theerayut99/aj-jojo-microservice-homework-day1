@@ -50,8 +50,18 @@ class LoanRoute extends Route {
   LoanRoute() : super(path: '/');
 
   @override
-  FutureOr<Result> handleCall(Session session, Request request) {
+  FutureOr<Result> handleCall(Session session, Request request) async {
     // Factor 3: Config — service metadata from environment
+    dynamic payload = {};
+    if (request.method == 'POST') {
+      try {
+        final bodyStr = await utf8.decoder.bind(request).join();
+        if (bodyStr.isNotEmpty) {
+          payload = jsonDecode(bodyStr);
+        }
+      } catch (_) {}
+    }
+
     final body = {
       'timestamp': DateTime.now().toUtc().toIso8601String(),
       'level': 'INFO',
@@ -72,7 +82,7 @@ class LoanRoute extends Route {
         'headers': {
           'x-request-id': 'abc123xyz',
         },
-        'body': {
+        'body': request.method == 'POST' ? payload : {
           'customer_id': 1001,
         },
         'ip': '10.0.0.1',

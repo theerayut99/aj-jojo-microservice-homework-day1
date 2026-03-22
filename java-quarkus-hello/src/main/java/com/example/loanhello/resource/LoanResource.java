@@ -5,6 +5,8 @@ import com.example.loanhello.model.HealthResponse;
 import com.example.loanhello.model.LoanLogResponse;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -33,6 +35,17 @@ public class LoanResource {
                  content = @Content(schema = @Schema(implementation = LoanLogResponse.class)))
     public LoanLogResponse getLoanLog() {
         return LoanLogResponse.create(config.name(), config.version(), config.environment());
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Tag(name = "loan")
+    @Operation(summary = "Receive loan service webhook",
+               description = "Accepts an event payload and returns a webhook processed response")
+    @APIResponse(responseCode = "200", description = "OK",
+                 content = @Content(schema = @Schema(implementation = LoanLogResponse.class)))
+    public LoanLogResponse postLoanLog(java.util.Map<String, Object> payload) {
+        return LoanLogResponse.createWebhookEvent(config.name(), config.version(), config.environment(), payload);
     }
 
     @GET
