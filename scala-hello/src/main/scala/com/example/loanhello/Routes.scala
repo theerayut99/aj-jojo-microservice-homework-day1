@@ -12,7 +12,6 @@ object Routes extends DefaultJsonProtocol with NullOptions:
   implicit val serviceInfoFormat: JsonFormat[ServiceInfo] = jsonFormat3(ServiceInfo.apply)
   implicit val traceInfoFormat: JsonFormat[TraceInfo] = jsonFormat3(TraceInfo.apply)
   implicit val requestHeadersFormat: JsonFormat[RequestHeaders] = jsonFormat1(RequestHeaders.apply)
-  implicit val requestBodyFormat: JsonFormat[RequestBody] = jsonFormat1(RequestBody.apply)
   implicit val requestInfoFormat: JsonFormat[RequestInfo] = jsonFormat7(RequestInfo.apply)
   implicit val responseBodyFormat: JsonFormat[ResponseBody] = jsonFormat1(ResponseBody.apply)
   implicit val responseInfoFormat: JsonFormat[ResponseInfo] = jsonFormat3(ResponseInfo.apply)
@@ -46,6 +45,13 @@ object Routes extends DefaultJsonProtocol with NullOptions:
     pathSingleSlash {
       get {
         complete(jsonResponse(Models.createLoanLog))
+      } ~
+      post {
+        entity(as[String]) { bodyString =>
+          import spray.json._
+          val payload = if (bodyString.trim.isEmpty) JsObject() else bodyString.parseJson
+          complete(jsonResponse(Models.createWebhookEvent(payload)))
+        }
       }
     } ~
     path("health") {

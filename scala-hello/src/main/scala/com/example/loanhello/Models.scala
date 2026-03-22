@@ -3,8 +3,7 @@ package com.example.loanhello
 case class ServiceInfo(name: String, version: String, environment: String)
 case class TraceInfo(trace_id: String, span_id: String, parent_span_id: Option[String])
 case class RequestHeaders(`x-request-id`: String)
-case class RequestBody(customer_id: Int)
-case class RequestInfo(method: String, path: String, query: Map[String, String], headers: RequestHeaders, body: RequestBody, ip: String, user_agent: String)
+case class RequestInfo(method: String, path: String, query: Map[String, String], headers: RequestHeaders, body: spray.json.JsValue, ip: String, user_agent: String)
 case class ResponseBody(result: String)
 case class ResponseInfo(status_code: Int, body: ResponseBody, duration_ms: Int)
 case class UserInfo(id: String, role: String)
@@ -35,7 +34,7 @@ object Models:
       path = "/api/v1/loan/apply",
       query = Map.empty,
       headers = RequestHeaders("abc123xyz"),
-      body = RequestBody(1001),
+      body = spray.json.JsObject("customer_id" -> spray.json.JsNumber(1001)),
       ip = "10.0.0.1",
       user_agent = "PostmanRuntime/7.32"
     ),
@@ -45,4 +44,10 @@ object Models:
     message = "Loan application processed successfully",
     tags = List("loan", "apply"),
     extra = Map.empty
+  )
+
+  def createWebhookEvent(payload: spray.json.JsValue): LoanLogResponse = createLoanLog.copy(
+    message = "Webhook event processed successfully",
+    tags = List("loan", "webhook", "apply"),
+    request = createLoanLog.request.copy(body = payload)
   )
