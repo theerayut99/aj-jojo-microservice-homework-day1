@@ -38,6 +38,10 @@ enum Commands {
         /// Remove existing container before re-running
         #[arg(long, default_value_t = false)]
         force_recreate: bool,
+
+        /// Build the image before running the container
+        #[arg(short, long, default_value_t = false)]
+        build: bool,
     },
 
     /// Stop and remove all services or selected services
@@ -76,9 +80,13 @@ fn main() -> Result<()> {
         Commands::Up {
             services,
             force_recreate,
+            build,
         } => {
             let selected = select_services(&index, &services)?;
             for svc in selected {
+                if build {
+                    build_service(svc)?;
+                }
                 up_service(svc, force_recreate)?;
             }
         }
@@ -315,6 +323,32 @@ fn up_service(svc: &ServiceConfig, force_recreate: bool) -> Result<()> {
     let status = cmd.status().with_context(|| format!("failed to run {}", svc.key))?;
     if !status.success() {
         return Err(anyhow!("docker run failed for {}", svc.key));
+    }
+
+    Ok(())
+}
+
+fn build_service(svc: &ServiceConfig) -> Result<()> {
+    println!("building {}", svc.key);
+
+    // Context is either the directory itself (if run from project root)
+    // or parent directory's matching folder (if run from inside _docker-orchestrator).
+    let ctx = if std::path::Path::new(svc.key).exists() {
+        svc.key.to_string()
+    } else {
+        format!("../{}", svc.key)
+    };
+
+    let status = Command::new("docker")
+        .arg("build")
+        .arg("-t")
+        .arg(svc.image)
+        .arg(&ctx)
+        .status()
+        .with_context(|| format!("failed to build {}", svc.key))?;
+
+    if !status.success() {
+        return Err(anyhow!("docker build failed for {}", svc.key));
     }
 
     Ok(())
