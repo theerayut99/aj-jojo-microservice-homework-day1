@@ -53,9 +53,9 @@ class LoanRoute extends Route {
   FutureOr<Result> handleCall(Session session, Request request) async {
     // Factor 3: Config — service metadata from environment
     dynamic payload = {};
-    if (request.method == 'POST') {
+    if (request.method == Method.post) {
       try {
-        final bodyStr = await utf8.decoder.bind(request).join();
+        final bodyStr = await request.readAsString();
         if (bodyStr.isNotEmpty) {
           payload = jsonDecode(bodyStr);
         }
@@ -82,7 +82,7 @@ class LoanRoute extends Route {
         'headers': {
           'x-request-id': 'abc123xyz',
         },
-        'body': request.method == 'POST' ? payload : {
+        'body': request.method == Method.post ? payload : {
           'customer_id': 1001,
         },
         'ip': '10.0.0.1',
