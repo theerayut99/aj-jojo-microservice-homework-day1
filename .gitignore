@@ -20,3 +20,11 @@ php-hello/*.cache
 php-hello/.phpintel/
 php-hello/phpstan.neon
 php-hello/phpunit.xml
+
+# Java/Kotlin
+bin/
+build/
+target/
+*.class
+*.jar
+*.war
